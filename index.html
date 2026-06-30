@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nowe Horyzonty 2026 — Program Filmowy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0d0c0a;
+      --surface:      #121009;
+      --surface-h:    #1a1815;
+      --seam:         #201e1a;
+      --text-1:       #ede3d5;
+      --text-2:       #8c8177;
+      --text-3:       #4e4940;
+      --accent:       #c4881c;
+      --accent-mid:   rgba(196,136,28,.4);
+      --accent-dim:   rgba(196,136,28,.1);
+      --green:        rgba(58,116,78,.15);
+      --green-text:   #65a07a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── film grain ─────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9999;
+      opacity: .03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 300px 300px;
+    }
+
+    /* ── header ─────────────────────────────────────────── */
+    header {
+      padding: 56px 48px 44px;
+      border-bottom: 1px solid var(--seam);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ghost {
+      position: absolute; right: -20px; bottom: -42px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 240px; font-weight: 600; line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px #1d1b17;
+      pointer-events: none; user-select: none;
+    }
+
+    .eyebrow {
+      font-size: 10.5px; letter-spacing: .28em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 14px; font-weight: 400;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(40px, 5.5vw, 76px);
+      font-weight: 300; line-height: 1.04;
+      letter-spacing: -.015em;
+    }
+
+    h1 em { font-style: italic; color: var(--accent); }
+
+    .sub {
+      margin-top: 12px; font-size: 12.5px;
+      color: var(--text-3); letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .rule {
+      width: 48px; height: 1px;
+      background: var(--accent); opacity: .55;
+      margin: 28px 0;
+    }
+
+    .stats { display: flex; gap: 40px; flex-wrap: wrap; }
+
+    .stat { display: flex; flex-direction: column; gap: 3px; }
+
+    .stat-n {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px; font-weight: 600;
+      color: var(--accent); line-height: 1;
+    }
+
+    .stat-l {
+      font-size: 10px; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--text-3);
+    }
+
+    /* ── sticky controls ────────────────────────────────── */
+    .controls {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(13,12,10,.92);
+      backdrop-filter: blur(16px) saturate(1.2);
+      border-bottom: 1px solid var(--seam);
+      padding: 14px 48px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .search-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .search-wrap { position: relative; flex: 1; max-width: 480px; }
+
+    .search-wrap svg {
+      position: absolute; left: 11px; top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px; color: var(--text-3);
+    }
+
+    #search {
+      width: 100%;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--seam);
+      color: var(--text-1);
+      padding: 9px 12px 9px 34px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 300;
+      border-radius: 3px; outline: none;
+      transition: border-color .2s, background .2s;
+    }
+
+    #search::placeholder { color: var(--text-3); }
+
+    #search:focus {
+      border-color: var(--accent-mid);
+      background: var(--accent-dim);
+    }
+
+    .count {
+      font-size: 12px; color: var(--text-3);
+      letter-spacing: .03em; white-space: nowrap;
+      min-width: 60px; text-align: right;
+    }
+
+    /* chips */
+    .chips {
+      display: flex; gap: 5px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .chips::-webkit-scrollbar { display: none; }
+
+    .chip {
+      flex-shrink: 0;
+      padding: 5px 13px;
+      font-size: 11.5px; font-family: inherit;
+      font-weight: 400; letter-spacing: .04em;
+      border: 1px solid var(--seam); border-radius: 2px;
+      background: transparent; color: var(--text-3);
+      cursor: pointer; white-space: nowrap;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+
+    .chip:hover { border-color: var(--accent-mid); color: var(--text-2); }
+
+    .chip.on {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0d0c0a; font-weight: 500;
+    }
+
+    /* ── film grid ──────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1px;
+      background: var(--seam);
+    }
+
+    /* ── card ───────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      padding: 28px 30px;
+      position: relative; overflow: hidden;
+      transition: background .2s;
+    }
+
+    /* amber left bar on hover */
+    .card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; width: 2px; height: 0;
+      background: var(--accent);
+      transition: height .35s ease;
+    }
+
+    .card:hover { background: var(--surface-h); }
+    .card:hover::before { height: 100%; }
+
+    /* section badges */
+    .badges {
+      display: flex; flex-wrap: wrap;
+      gap: 5px; margin-bottom: 13px;
+    }
+
+    .badge {
+      font-size: 9.5px; letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 3px 8px 2px; border-radius: 1px;
+      border: 1px solid transparent;
+    }
+
+    /* title */
+    .title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 23px; font-weight: 400; line-height: 1.22;
+      margin-bottom: 4px;
+    }
+
+    .title a {
+      color: inherit; text-decoration: none;
+      transition: color .15s;
+    }
+    .title a:hover { color: var(--accent); }
+
+    .orig {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13.5px; font-style: italic;
+      color: var(--text-3); margin-bottom: 6px;
+    }
+
+    .dir {
+      font-size: 12.5px; color: var(--accent-mid);
+      letter-spacing: .03em; margin-bottom: 16px;
+      font-weight: 400;
+    }
+    .dir::before {
+      content: 'reż. ';
+      color: var(--text-3); font-size: 10px;
+      letter-spacing: .1em; text-transform: uppercase;
+    }
+
+    /* screenings */
+    .screenings {
+      display: flex; flex-wrap: wrap;
+      gap: 5px; margin-bottom: 16px;
+    }
+
+    .stag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 9px; font-size: 11px;
+      border: 1px solid var(--seam); border-radius: 2px;
+    }
+
+    .stag.ok {
+      border-color: rgba(58,116,78,.35);
+      background: var(--green);
+    }
+
+    .sdot {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--text-3); flex-shrink: 0;
+    }
+    .stag.ok .sdot { background: var(--green-text); }
+
+    .stime { color: var(--text-2); }
+    .stag.ok .stime { color: var(--green-text); }
+
+    /* description */
+    .desc { font-size: 13px; line-height: 1.8; color: var(--text-2); }
+
+    .desc-body {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      overflow: hidden;
+    }
+
+    .desc-body.open { display: block; }
+
+    .more {
+      display: none; /* JS shows when clamped */
+      margin-top: 7px;
+      font-size: 10.5px; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--accent);
+      cursor: pointer; background: none; border: none;
+      padding: 0; font-family: inherit;
+      transition: opacity .15s;
+    }
+    .more:hover { opacity: .6; }
+
+    /* empty / loading */
+    .msg {
+      grid-column: 1 / -1;
+      padding: 100px 40px; text-align: center;
+      color: var(--text-3);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px; font-style: italic;
+      background: var(--surface);
+    }
+
+    /* entrance animation */
+    @keyframes up {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card { animation: up .35s ease both; }
+
+    /* footer */
+    footer {
+      padding: 28px 48px;
+      border-top: 1px solid var(--seam);
+      font-size: 10.5px; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--text-3);
+      display: flex; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+    }
+
+    /* ── responsive ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      header { padding: 36px 20px 30px; }
+      .ghost { font-size: 140px; right: -10px; bottom: -18px; }
+      .controls { padding: 12px 20px; }
+      .grid { grid-template-columns: 1fr; }
+      .card { padding: 22px 20px; }
+      footer { padding: 22px 20px; }
+      .stats { gap: 24px; }
+    }
+
+    @media (max-width: 460px) {
+      h1 { font-size: 34px; }
+      .ghost { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="ghost" aria-hidden="true">NH</p>
+  <p class="eyebrow">26. Międzynarodowy Festiwal Filmowy</p>
+  <h1>Nowe<br><em>Horyzonty</em></h1>
+  <p class="sub">Wrocław &nbsp;·&nbsp; 23 lip – 2 sie 2026</p>
+  <div class="rule"></div>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-n" id="s-films">–</span>
+      <span class="stat-l">Filmów</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n" id="s-seats">–</span>
+      <span class="stat-l">Seansów</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n" id="s-avail">–</span>
+      <span class="stat-l">Dostępnych</span>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7.5"/>
+        <line x1="16.5" y1="16.5" x2="21" y2="21"/>
+      </svg>
+      <input type="text" id="search" placeholder="Szukaj tytułu lub reżysera…" autocomplete="off" spellcheck="false">
+    </div>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<main>
+  <div class="grid" id="grid">
+    <div class="msg">Ładowanie programu…</div>
+  </div>
+</main>
+
+<footer>
+  <span>Nowe Horyzonty 2026</span>
+  <span>nowehoryzonty.pl</span>
+</footer>
+
+<script>
+let films = [];
+let query = '';
+let activeSection = '';
+let firstRender = true;
+
+// ── palette per section (stable hash) ───────────────────────────────────────
+const PALETTES = [
+  { bg:'rgba(196,136,28,.10)', bd:'rgba(196,136,28,.32)', tx:'#c4881c' },
+  { bg:'rgba(80,148,190,.09)', bd:'rgba(80,148,190,.28)', tx:'#62a8d2' },
+  { bg:'rgba(148,90,168,.09)', bd:'rgba(148,90,168,.28)', tx:'#b278cc' },
+  { bg:'rgba(58,130,90,.09)',  bd:'rgba(58,130,90,.28)',  tx:'#58a878' },
+  { bg:'rgba(190,80,70,.09)',  bd:'rgba(190,80,70,.28)',  tx:'#c87060' },
+  { bg:'rgba(90,160,70,.09)',  bd:'rgba(90,160,70,.28)',  tx:'#80b858' },
+  { bg:'rgba(60,130,160,.09)', bd:'rgba(60,130,160,.28)', tx:'#56a8c8' },
+];
+
+const pCache = {};
+function pal(name) {
+  if (!pCache[name]) {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    pCache[name] = PALETTES[h % PALETTES.length];
+  }
+  return pCache[name];
+}
+
+// ── render helpers ──────────────────────────────────────────────────────────
+function badge(sec) {
+  const p = pal(sec);
+  return `<span class="badge" style="background:${p.bg};border-color:${p.bd};color:${p.tx}">${sec}</span>`;
+}
+
+function card(film, idx, animate) {
+  const delay = animate ? Math.min(idx * 22, 220) : 0;
+  const hasDiff = film.title_original && film.title_original !== film.title;
+  const sc = film.screenings || [];
+  const desc = (film.description || '').replace(/\n+/g, ' ').trim();
+
+  const badgesHtml = film.sections.map(badge).join('');
+  const scHtml = sc.map(s =>
+    `<span class="stag ${s.available ? 'ok' : ''}">
+      <span class="sdot"></span>
+      <span class="stime">${s.datetime_text}</span>
+    </span>`
+  ).join('');
+
+  return `
+<article class="card" style="animation-delay:${delay}ms">
+  ${badgesHtml ? `<div class="badges">${badgesHtml}</div>` : ''}
+  <h2 class="title"><a href="${film.url}" target="_blank" rel="noopener">${film.title}</a></h2>
+  ${hasDiff ? `<p class="orig">${film.title_original}</p>` : ''}
+  ${film.director ? `<p class="dir">${film.director}</p>` : ''}
+  ${scHtml ? `<div class="screenings">${scHtml}</div>` : ''}
+  ${desc ? `
+  <div class="desc">
+    <div class="desc-body">${desc}</div>
+    <button class="more" onclick="toggle(this)">więcej ↓</button>
+  </div>` : ''}
+</article>`;
+}
+
+function filtered() {
+  const q = query.toLowerCase();
+  return films.filter(f => {
+    const txt = `${f.title} ${f.title_original || ''} ${f.director || ''}`.toLowerCase();
+    return (!q || txt.includes(q)) && (!activeSection || f.sections.includes(activeSection));
+  });
+}
+
+function render() {
+  const list = filtered();
+  const grid = document.getElementById('grid');
+  const cnt  = document.getElementById('count');
+
+  cnt.textContent = (list.length < films.length)
+    ? `${list.length} z ${films.length}`
+    : `${films.length} filmów`;
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="msg">Brak wyników dla podanych kryteriów</div>';
+    return;
+  }
+
+  const animate = firstRender;
+  firstRender = false;
+  grid.innerHTML = list.map((f, i) => card(f, i, animate)).join('');
+
+  // show expand button only when text is actually truncated
+  requestAnimationFrame(() => {
+    grid.querySelectorAll('.desc-body').forEach(el => {
+      if (el.scrollHeight > el.offsetHeight + 2) {
+        el.nextElementSibling.style.display = 'inline-block';
+      }
+    });
+  });
+}
+
+function buildChips(sections) {
+  const el = document.getElementById('chips');
+  const mk = (label, val) =>
+    `<button class="chip${val === activeSection ? ' on' : ''}" data-v="${val}">${label}</button>`;
+  el.innerHTML = mk('Wszystkie', '') + sections.map(s => mk(s, s)).join('');
+  el.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      activeSection = chip.dataset.v;
+      el.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === chip));
+      render();
+    });
+  });
+}
+
+function updateStats() {
+  const seats = films.reduce((n, f) => n + (f.screenings?.length || 0), 0);
+  const avail = films.reduce((n, f) => n + (f.screenings?.filter(s => s.available).length || 0), 0);
+  document.getElementById('s-films').textContent = films.length;
+  document.getElementById('s-seats').textContent = seats;
+  document.getElementById('s-avail').textContent = avail;
+}
+
+// ── toggle description ───────────────────────────────────────────────────────
+function toggle(btn) {
+  const body = btn.previousElementSibling;
+  const open = body.classList.toggle('open');
+  btn.textContent = open ? 'zwiń ↑' : 'więcej ↓';
+}
+
+// ── search ───────────────────────────────────────────────────────────────────
+document.getElementById('search').addEventListener('input', e => {
+  query = e.target.value.trim();
+  render();
+});
+
+// ── init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('./films.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    films = await res.json();
+    updateStats();
+    const sections = [...new Set(films.flatMap(f => f.sections))];
+    buildChips(sections);
+    render();
+  } catch (e) {
+    document.getElementById('grid').innerHTML =
+      `<div class="msg">Błąd ładowania: ${e.message}</div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
