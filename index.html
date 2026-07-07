@@ -19,6 +19,7 @@
       --accent:     #EC008C;
       --green:      rgba(25,135,84,.09);
       --green-text: #1a7a40;
+      --red:        #c82333;
     }
 
     html { scroll-behavior: smooth; }
@@ -87,6 +88,46 @@
       font-size: 9.5px; letter-spacing: .2em;
       text-transform: uppercase; color: var(--text-3);
     }
+
+    /* ── view tabs ── */
+    .view-tabs {
+      background: var(--surface);
+      border-bottom: 1px solid var(--seam);
+      padding: 0 48px;
+      display: flex;
+    }
+
+    .vtab {
+      padding: 14px 20px;
+      font-size: 11px; letter-spacing: .13em;
+      text-transform: uppercase; font-weight: 400;
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-3);
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+      margin-bottom: -1px;
+      display: flex; align-items: center; gap: 7px;
+    }
+
+    .vtab:hover { color: var(--text-1); }
+
+    .vtab.vtab-on {
+      color: var(--text-1);
+      border-bottom-color: var(--text-1);
+      font-weight: 500;
+    }
+
+    .plan-badge {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 2em;
+      font-size: 10px; font-weight: 500;
+      padding: 1px 7px;
+      display: none;
+    }
+
+    .plan-badge.visible { display: inline; }
 
     /* ── controls ── */
     .controls {
@@ -200,6 +241,22 @@
       display: flex; flex-direction: column;
       align-items: flex-end; gap: 4px;
       padding-top: 1px; min-width: 148px;
+    }
+
+    /* wishlist button */
+    .wl-btn {
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--seam); border-radius: 50%;
+      background: var(--surface); color: var(--text-3);
+      cursor: pointer; font-size: 15px;
+      transition: all .15s; flex-shrink: 0;
+      align-self: flex-end;
+      margin-bottom: 6px;
+    }
+    .wl-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .wl-btn.on {
+      background: var(--accent); border-color: var(--accent); color: #fff;
     }
 
     /* badges */
@@ -325,6 +382,238 @@
     }
     .card { animation: up .28s ease both; }
 
+    /* ── plan view ── */
+    #plan-view { min-height: 50vh; }
+
+    .plan-empty {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 40vh; padding: 40px;
+      color: var(--text-3); font-size: 18px; font-weight: 300;
+      text-align: center;
+    }
+
+    .plan-top {
+      padding: 28px 48px 20px;
+      border-bottom: 1px solid var(--seam);
+      background: var(--surface);
+      display: flex; align-items: flex-start;
+      gap: 32px; flex-wrap: wrap;
+    }
+
+    .plan-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+
+    .pstat { display: flex; flex-direction: column; gap: 2px; }
+
+    .pstat-n {
+      font-size: 28px; font-weight: 500;
+      color: var(--accent); line-height: 1;
+    }
+
+    .pstat-n.red { color: var(--red); }
+    .pstat-n.grey { color: var(--text-3); }
+
+    .pstat-l {
+      font-size: 9px; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--text-3);
+    }
+
+    .plan-note {
+      font-size: 10.5px; color: var(--text-3);
+      letter-spacing: .04em; align-self: flex-end;
+    }
+
+    /* ── timeline ── */
+    .tl-wrap {
+      overflow-x: auto;
+      padding: 20px 48px 48px;
+    }
+
+    .tl-flex {
+      display: flex;
+      min-width: 520px;
+    }
+
+    .tl-axis-col {
+      flex-shrink: 0;
+      width: 44px;
+      padding-top: 36px;
+    }
+
+    .tl-axis-inner {
+      position: relative;
+    }
+
+    .tl-hour-label {
+      position: absolute; left: 0; right: 4px;
+      font-size: 9.5px; color: var(--text-3);
+      letter-spacing: .04em; text-align: right;
+      transform: translateY(-50%);
+      pointer-events: none; user-select: none;
+    }
+
+    .tl-day-col {
+      flex: 1;
+      min-width: 120px;
+      display: flex; flex-direction: column;
+      border-left: 1px solid var(--seam);
+    }
+
+    .tl-day-hdr {
+      height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; flex-shrink: 0;
+      border-bottom: 1px solid var(--seam);
+      background: var(--surface);
+    }
+
+    .tl-day-dn {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+
+    .tl-day-dt {
+      font-size: 10px; color: var(--text-3);
+    }
+
+    .tl-day-body {
+      position: relative;
+      background: var(--surface);
+    }
+
+    .tl-grid-line {
+      position: absolute; left: 0; right: 0;
+      height: 1px; background: var(--seam);
+      pointer-events: none;
+    }
+
+    .film-block {
+      position: absolute;
+      border-radius: 3px;
+      padding: 5px 7px;
+      overflow: hidden;
+      cursor: default;
+      background: var(--accent);
+      transition: opacity .15s;
+    }
+
+    .film-block:hover { opacity: .9; z-index: 10; }
+    .film-block:hover .fb-remove { opacity: 1; }
+
+    .film-block.conflict { background: var(--red); }
+
+    .fb-remove {
+      position: absolute; top: 3px; right: 3px;
+      width: 16px; height: 16px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,.25); border: none; border-radius: 50%;
+      color: #fff; font-size: 11px; line-height: 1;
+      cursor: pointer; padding: 0;
+      opacity: 0; transition: opacity .1s, background .1s;
+    }
+    .fb-remove:hover { background: rgba(0,0,0,.5); }
+
+    .fb-time {
+      font-size: 8.5px; color: rgba(255,255,255,.75);
+      letter-spacing: .04em; white-space: nowrap;
+    }
+
+    .fb-title {
+      font-size: 11px; font-weight: 500; color: #fff;
+      line-height: 1.25; margin-top: 3px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+    }
+
+    .fb-venue {
+      font-size: 8.5px; color: rgba(255,255,255,.65);
+      letter-spacing: .08em; text-transform: uppercase;
+      margin-top: 3px; white-space: nowrap;
+    }
+
+    /* ── plan issues (films with no visible screenings) ── */
+    .plan-issues {
+      padding: 0 48px 24px;
+    }
+
+    .plan-section-hdr {
+      font-size: 10px; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--text-3);
+      font-weight: 400; margin-bottom: 8px; margin-top: 24px;
+    }
+
+    .plan-section-hdr:first-child { margin-top: 0; }
+
+    .plan-issue {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--seam);
+      font-size: 13px;
+    }
+
+    .issue-sub {
+      font-size: 11px; color: var(--text-3);
+    }
+
+    /* ── plan list ── */
+    .plan-list {
+      margin: 0 48px 48px;
+      border: 1px solid var(--seam);
+      border-radius: 4px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .plan-list-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--seam);
+      background: var(--surface-h);
+    }
+
+    .plan-list-title {
+      font-size: 10px; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--text-3); font-weight: 400;
+    }
+
+    .copy-btn {
+      padding: 5px 14px;
+      font-size: 10px; letter-spacing: .1em;
+      text-transform: uppercase; font-weight: 500;
+      font-family: 'Roboto', sans-serif;
+      border: 1px solid var(--seam); border-radius: 2em;
+      background: #fff; color: var(--text-2);
+      cursor: pointer; transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .plan-list-text {
+      display: block; width: 100%;
+      padding: 16px;
+      font-family: 'Roboto Mono', 'Courier New', monospace;
+      font-size: 12px; line-height: 1.8; color: var(--text-1);
+      background: var(--surface);
+      border: none; outline: none; resize: vertical;
+      min-height: 160px;
+    }
+
+    /* ── legend ── */
+    .tl-legend {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 0 48px 8px;
+    }
+
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10px; color: var(--text-3); letter-spacing: .05em;
+    }
+
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+    }
+
     /* footer */
     footer {
       background: var(--surface);
@@ -345,6 +634,12 @@
       .card-sc { align-items: flex-start; min-width: 0; flex-direction: row; flex-wrap: wrap; }
       footer { padding: 20px 20px; }
       .stats { gap: 22px; }
+      .view-tabs { padding: 0 20px; }
+      .plan-top { padding: 20px 20px 16px; }
+      .tl-wrap { padding: 16px 20px 40px; }
+      .plan-issues { padding: 0 20px 16px; }
+      .tl-legend { padding: 0 20px 8px; }
+      .plan-list { margin: 0 20px 40px; }
     }
     @media (max-width: 460px) {
       h1 { font-size: 34px; }
@@ -376,7 +671,15 @@
   </div>
 </header>
 
-<div class="controls">
+<nav class="view-tabs">
+  <button class="vtab vtab-on" id="tab-program" onclick="setTab('program')">Program</button>
+  <button class="vtab" id="tab-plan" onclick="setTab('plan')">
+    Mój Plan
+    <span class="plan-badge" id="plan-badge"></span>
+  </button>
+</nav>
+
+<div class="controls" id="controls">
   <div class="search-row">
     <div class="search-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -401,11 +704,13 @@
   </div>
 </div>
 
-<main>
+<main id="main-catalog">
   <div class="grid" id="grid">
     <div class="msg">Ładowanie programu…</div>
   </div>
 </main>
+
+<div id="plan-view" hidden></div>
 
 <footer>
   <span>Nowe Horyzonty 2026</span>
@@ -413,15 +718,366 @@
 </footer>
 
 <script>
+// ── state ──────────────────────────────────────────────────────────────────────
 let films = [];
 let query = '';
 let activeSection = '';
 let availOnly = false;
 let activeDate = '';
-let myStay = false;
+let myStay = true;
 let firstRender = true;
+let currentTab = 'program';
+
+let wishlist          = new Set(JSON.parse(localStorage.getItem('nh-wishlist')   || '[]'));
+let excludedScreenings = new Set(JSON.parse(localStorage.getItem('nh-excluded')  || '[]'));
 
 const MY_DATES = new Set(['pn 27 lip', 'wt 28 lip', 'śr 29 lip', 'cz 30 lip']);
+
+const PLAN_DAYS = [
+  { key: 'pn 27 lip', short: 'PN', date: '27 lip' },
+  { key: 'wt 28 lip', short: 'WT', date: '28 lip' },
+  { key: 'śr 29 lip', short: 'ŚR', date: '29 lip' },
+  { key: 'cz 30 lip', short: 'CZ', date: '30 lip' },
+];
+
+const DURATION_MIN = 120;
+const BUFFER_MIN   = 15;
+const PX_PER_MIN   = 1;
+const TL_START_H   = 9;
+const TL_END_H     = 24;
+const TL_RANGE_MIN = (TL_END_H - TL_START_H) * 60; // 900
+
+// ── tab switching ──────────────────────────────────────────────────────────────
+function setTab(name) {
+  currentTab = name;
+  const inProgram = name === 'program';
+  document.getElementById('controls').hidden       = !inProgram;
+  document.getElementById('main-catalog').hidden   = !inProgram;
+  document.getElementById('plan-view').hidden      = inProgram;
+  document.getElementById('tab-program').classList.toggle('vtab-on', inProgram);
+  document.getElementById('tab-plan').classList.toggle('vtab-on', !inProgram);
+  if (!inProgram) renderPlanView();
+}
+
+// ── wishlist ───────────────────────────────────────────────────────────────────
+function saveWishlist() {
+  localStorage.setItem('nh-wishlist', JSON.stringify([...wishlist]));
+}
+
+function updatePlanBadge() {
+  const badge = document.getElementById('plan-badge');
+  badge.textContent = wishlist.size;
+  badge.classList.toggle('visible', wishlist.size > 0);
+}
+
+document.getElementById('grid').addEventListener('click', e => {
+  const btn = e.target.closest('.wl-btn');
+  if (!btn) return;
+  e.stopPropagation();
+  const slug = btn.dataset.slug;
+  if (wishlist.has(slug)) {
+    wishlist.delete(slug);
+    // Clear any excluded screenings for this film
+    const film = films.find(f => f.slug === slug);
+    if (film) film.screenings.forEach(s => excludedScreenings.delete(s.screening_id));
+    localStorage.setItem('nh-excluded', JSON.stringify([...excludedScreenings]));
+  } else {
+    wishlist.add(slug);
+  }
+  saveWishlist();
+  const on = wishlist.has(slug);
+  btn.classList.toggle('on', on);
+  btn.title = on ? 'Usuń z planu' : 'Dodaj do planu';
+  btn.textContent = on ? '★' : '☆';
+  updatePlanBadge();
+});
+
+document.getElementById('plan-view').addEventListener('click', e => {
+  const btn = e.target.closest('.fb-remove');
+  if (!btn) return;
+  e.stopPropagation();
+  excludedScreenings.add(btn.dataset.sid);
+  localStorage.setItem('nh-excluded', JSON.stringify([...excludedScreenings]));
+  renderPlanView();
+});
+
+// ── scheduling algorithm ───────────────────────────────────────────────────────
+function minsFromMidnight(dtText) {
+  const m = dtText.match(/, (\d+):(\d+)/);
+  return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : null;
+}
+
+function screeningsConflict(s1, s2) {
+  if (extractDate(s1.datetime_text) !== extractDate(s2.datetime_text)) return false;
+  const m1 = minsFromMidnight(s1.datetime_text);
+  const m2 = minsFromMidnight(s2.datetime_text);
+  if (m1 === null || m2 === null) return false;
+  return Math.abs(m1 - m2) < DURATION_MIN + BUFFER_MIN;
+}
+
+function findConflicts(blocks) {
+  const ids = new Set();
+  for (let i = 0; i < blocks.length; i++)
+    for (let j = i + 1; j < blocks.length; j++)
+      if (screeningsConflict(blocks[i].screening, blocks[j].screening)) {
+        ids.add(blocks[i].screening.screening_id);
+        ids.add(blocks[j].screening.screening_id);
+      }
+  return ids;
+}
+
+function optimize(selectedFilms) {
+  const filmOptions = selectedFilms
+    .map(film => ({
+      film,
+      options: film.screenings.filter(s => MY_DATES.has(extractDate(s.datetime_text))),
+    }))
+    .sort((a, b) => {
+      if (!a.options.length && b.options.length) return 1;
+      if (a.options.length && !b.options.length) return -1;
+      return a.options.length - b.options.length;
+    });
+
+  const scheduled = [];
+  const noOptions = [];
+  const unfit     = [];
+
+  for (const { film, options } of filmOptions) {
+    if (!options.length) { noOptions.push(film); continue; }
+
+    const scored = options.map(opt => {
+      const conflictWith = scheduled.filter(s => screeningsConflict(opt, s.screening)).map(s => s.film);
+      return { opt, conflictWith };
+    }).sort((a, b) => a.conflictWith.length - b.conflictWith.length);
+
+    const best = scored[0];
+    if (!best.conflictWith.length) {
+      scheduled.push({ film, screening: best.opt });
+    } else {
+      unfit.push({ film, screening: best.opt, conflictsWith: best.conflictWith });
+    }
+  }
+
+  return { scheduled, noOptions, unfit };
+}
+
+// ── timeline rendering ─────────────────────────────────────────────────────────
+function assignLanes(blocks) {
+  const laneEnds = [];
+  blocks.forEach(block => {
+    const start = minsFromMidnight(block.screening.datetime_text) ?? 0;
+    let placed = false;
+    for (let i = 0; i < laneEnds.length; i++) {
+      if (start >= laneEnds[i]) {
+        block.lane = i;
+        laneEnds[i] = start + DURATION_MIN;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      block.lane = laneEnds.length;
+      laneEnds.push(start + DURATION_MIN);
+    }
+  });
+  return Math.max(laneEnds.length, 1);
+}
+
+function buildTimeline(allBlocks, conflictIds) {
+  const dayMap = {};
+  PLAN_DAYS.forEach(d => { dayMap[d.key] = []; });
+
+  allBlocks.forEach(b => {
+    const dk = extractDate(b.screening.datetime_text);
+    if (dayMap[dk]) dayMap[dk].push({ film: b.film, screening: b.screening, conflict: conflictIds.has(b.screening.screening_id) });
+  });
+
+  PLAN_DAYS.forEach(d => {
+    dayMap[d.key].sort((a, b) =>
+      (minsFromMidnight(a.screening.datetime_text) ?? 0) -
+      (minsFromMidnight(b.screening.datetime_text) ?? 0));
+  });
+
+  // Axis labels and grid lines
+  const axisLabels = [];
+  const gridLines  = [];
+  for (let h = TL_START_H; h <= TL_END_H; h++) {
+    const top = (h * 60 - TL_START_H * 60) * PX_PER_MIN;
+    gridLines.push(`<div class="tl-grid-line" style="top:${top}px"></div>`);
+    if (h < TL_END_H)
+      axisLabels.push(`<div class="tl-hour-label" style="top:${top}px">${h}:00</div>`);
+  }
+
+  const dayCols = PLAN_DAYS.map(day => {
+    const blocks   = dayMap[day.key];
+    const numLanes = assignLanes(blocks);
+
+    const blocksHtml = blocks.map(({ film, screening, conflict, lane }) => {
+      const startMin = minsFromMidnight(screening.datetime_text);
+      if (startMin === null) return '';
+      const top    = (startMin - TL_START_H * 60) * PX_PER_MIN;
+      const height = Math.max(DURATION_MIN * PX_PER_MIN, 44);
+      const time   = screening.datetime_text.match(/, (.+)/)?.[1] ?? '';
+      const endMin = startMin + DURATION_MIN;
+      const endStr = `${Math.floor(endMin / 60)}:${String(endMin % 60).padStart(2, '0')}`;
+      const laneW  = 100 / numLanes;
+
+      return `<div class="film-block${conflict ? ' conflict' : ''}"
+               style="top:${top}px;height:${height}px;left:calc(${lane*laneW}% + 3px);right:calc(${100-(lane+1)*laneW}% + 3px)"
+               title="${film.title.replace(/"/g,'&quot;')}\n${time}–~${endStr}\n${screening.venue}">
+        <button class="fb-remove" data-sid="${screening.screening_id}" title="Usuń seans">×</button>
+        <div class="fb-time">${time} – ~${endStr}</div>
+        <div class="fb-title">${film.title}</div>
+        ${screening.venue_short ? `<div class="fb-venue">${screening.venue_short}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    return `<div class="tl-day-col">
+      <div class="tl-day-hdr">
+        <span class="tl-day-dn">${day.short}</span>
+        <span class="tl-day-dt">${day.date}</span>
+      </div>
+      <div class="tl-day-body" style="height:${TL_RANGE_MIN * PX_PER_MIN}px">
+        ${gridLines.join('')}
+        ${blocksHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="tl-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>seans w planie</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>konflikt czasowy</div>
+    <div class="legend-item" style="color:var(--text-3);font-style:italic">najedź na blok → × usuwa seans</div>
+  </div>
+  <div class="tl-wrap">
+    <div class="tl-flex">
+      <div class="tl-axis-col">
+        <div class="tl-day-hdr"></div>
+        <div class="tl-axis-inner" style="height:${TL_RANGE_MIN * PX_PER_MIN}px">
+          ${axisLabels.join('')}
+        </div>
+      </div>
+      ${dayCols}
+    </div>
+  </div>`;
+}
+
+// ── plan view rendering ────────────────────────────────────────────────────────
+function buildPlanListText(blocks) {
+  const DAY_LABELS = {
+    'pn 27 lip': 'Poniedziałek, 27 lip',
+    'wt 28 lip': 'Wtorek, 28 lip',
+    'śr 29 lip': 'Środa, 29 lip',
+    'cz 30 lip': 'Czwartek, 30 lip',
+  };
+  const byDay = {};
+  PLAN_DAYS.forEach(d => { byDay[d.key] = []; });
+  blocks.forEach(b => {
+    const dk = extractDate(b.screening.datetime_text);
+    if (byDay[dk]) byDay[dk].push(b);
+  });
+
+  const lines = ['PLAN SEANSÓW — 27–30 LIP 2026', ''];
+  PLAN_DAYS.forEach(d => {
+    const day = byDay[d.key];
+    if (!day.length) return;
+    day.sort((a, b) => (minsFromMidnight(a.screening.datetime_text) ?? 0) - (minsFromMidnight(b.screening.datetime_text) ?? 0));
+    lines.push(DAY_LABELS[d.key]);
+    day.forEach(b => {
+      const time = b.screening.datetime_text.match(/, (.+)/)?.[1] ?? '';
+      lines.push(`  • ${b.film.title} — ${time}, ${b.screening.venue}`);
+    });
+    lines.push('');
+  });
+  return lines.join('\n').trimEnd();
+}
+
+function renderPlanView() {
+  const el = document.getElementById('plan-view');
+
+  if (!wishlist.size) {
+    el.innerHTML = `<div class="plan-empty">Dodaj filmy do planu, klikając ☆ przy filmie w programie.</div>`;
+    return;
+  }
+
+  const selected = films.filter(f => wishlist.has(f.slug));
+
+  // Collect all Jul 27-30 screenings, minus user-excluded ones
+  const allBlocks = [];
+  selected.forEach(film => {
+    film.screenings
+      .filter(s => MY_DATES.has(extractDate(s.datetime_text)) && !excludedScreenings.has(s.screening_id))
+      .forEach(s => allBlocks.push({ film, screening: s }));
+  });
+
+  // Films entirely hidden (all screenings excluded or none in Jul 27-30)
+  const hiddenFilms = selected.filter(film => {
+    const stayScreenings = film.screenings.filter(s => MY_DATES.has(extractDate(s.datetime_text)));
+    if (!stayScreenings.length) return true; // no screenings during stay
+    return stayScreenings.every(s => excludedScreenings.has(s.screening_id));
+  });
+
+  const conflictIds = findConflicts(allBlocks);
+  allBlocks.forEach(b => { b.conflict = conflictIds.has(b.screening.screening_id); });
+
+  const nConflicts = conflictIds.size;
+
+  const statsHtml = `<div class="plan-stats">
+    <div class="pstat">
+      <span class="pstat-n">${allBlocks.length}</span>
+      <span class="pstat-l">seansów w planie</span>
+    </div>
+    ${nConflicts ? `<div class="pstat">
+      <span class="pstat-n red">${nConflicts}</span>
+      <span class="pstat-l">konfliktów</span>
+    </div>` : ''}
+    ${hiddenFilms.length ? `<div class="pstat">
+      <span class="pstat-n grey">${hiddenFilms.length}</span>
+      <span class="pstat-l">ukrytych</span>
+    </div>` : ''}
+  </div>
+  <p class="plan-note">Najedź na seans i kliknij × żeby go usunąć${nConflicts ? ' · czerwony = konflikt czasowy' : ''}</p>`;
+
+  // Issues: films with no visible screenings
+  let issuesHtml = '';
+  if (hiddenFilms.length) {
+    const parts = [`<p class="plan-section-hdr">Brak seansu w planie (${hiddenFilms.length}) — wróć do programu żeby zmienić wybór</p>`];
+    hiddenFilms.forEach(film => {
+      const noStay = !film.screenings.some(s => MY_DATES.has(extractDate(s.datetime_text)));
+      parts.push(`<div class="plan-issue">
+        <strong>${film.title}</strong>
+        <span class="issue-sub">${noStay ? 'Wszystkie seanse poza pobytem 27–30 lip' : 'Wszystkie seanse usunięte — odśwież stronę żeby przywrócić'}</span>
+      </div>`);
+    });
+    issuesHtml = `<div class="plan-issues">${parts.join('')}</div>`;
+  }
+
+  // Bottom copyable list
+  const listText = buildPlanListText(allBlocks);
+  const listHtml = `<div class="plan-list">
+    <div class="plan-list-head">
+      <span class="plan-list-title">Lista do zakupu biletów</span>
+      <button class="copy-btn" onclick="copyPlanList(this)">Kopiuj</button>
+    </div>
+    <textarea class="plan-list-text" id="plan-list-text" readonly spellcheck="false">${listText}</textarea>
+  </div>`;
+
+  el.innerHTML = `
+    <div class="plan-top">${statsHtml}</div>
+    ${buildTimeline(allBlocks, conflictIds)}
+    ${issuesHtml}
+    ${listHtml}
+  `;
+}
+
+function copyPlanList(btn) {
+  const ta = document.getElementById('plan-list-text');
+  navigator.clipboard.writeText(ta.value).then(() => {
+    btn.textContent = 'Skopiowano!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 2000);
+  });
+}
 
 // ── palette per section (stable hash) ─────────────────────────────────────────
 const PALETTES = [
@@ -451,10 +1107,11 @@ function badge(sec) {
 }
 
 function card(film, idx, animate) {
-  const delay = animate ? Math.min(idx * 20, 200) : 0;
-  const hasDiff = film.title_original && film.title_original !== film.title;
+  const delay      = animate ? Math.min(idx * 20, 200) : 0;
+  const hasDiff    = film.title_original && film.title_original !== film.title;
+  const wishlisted = wishlist.has(film.slug);
   let sc = film.screenings || [];
-  if (myStay) sc = sc.filter(s => MY_DATES.has(extractDate(s.datetime_text)));
+  if (myStay)    sc = sc.filter(s => MY_DATES.has(extractDate(s.datetime_text)));
   if (activeDate) sc = sc.filter(s => extractDate(s.datetime_text) === activeDate);
   const desc = (film.description || '').replace(/\n+/g, ' ').trim();
 
@@ -485,7 +1142,13 @@ function card(film, idx, animate) {
       <ul class="prize-list">${film.prizes.map(p => `<li>${p}</li>`).join('')}</ul>
     </div>` : ''}
   </div>
-  ${scHtml ? `<div class="card-sc">${scHtml}</div>` : ''}
+  <div class="card-sc">
+    <button class="wl-btn${wishlisted ? ' on' : ''}"
+            data-slug="${film.slug}"
+            title="${wishlisted ? 'Usuń z planu' : 'Dodaj do planu'}"
+            aria-label="${wishlisted ? 'Usuń z planu' : 'Dodaj do planu'}">${wishlisted ? '★' : '☆'}</button>
+    ${scHtml}
+  </div>
 </article>`;
 }
 
@@ -535,15 +1198,13 @@ function render() {
 
   requestAnimationFrame(() => {
     grid.querySelectorAll('.desc-body').forEach(el => {
-      if (el.scrollHeight > el.offsetHeight + 2) {
+      if (el.scrollHeight > el.offsetHeight + 2)
         el.nextElementSibling.style.display = 'inline-block';
-      }
     });
   });
 }
 
 function buildChips(sections, dates) {
-  // Section chips
   const el = document.getElementById('chips');
   const mk = (label, val) =>
     `<button class="chip${val === activeSection ? ' on' : ''}" data-v="${val}">${label}</button>`;
@@ -556,8 +1217,8 @@ function buildChips(sections, dates) {
     });
   });
 
-  // Stay button
   const stayBtn = document.getElementById('stay-btn');
+  stayBtn.classList.toggle('stay-on', myStay);
   stayBtn.addEventListener('click', () => {
     myStay = !myStay;
     if (myStay) {
@@ -570,7 +1231,6 @@ function buildChips(sections, dates) {
     render();
   });
 
-  // Date chips
   const del = document.getElementById('date-chips');
   const mkd = (label, val) =>
     `<button class="chip${!myStay && val === activeDate ? ' date-on' : ''}" data-v="${val}">${label}</button>`;
@@ -585,7 +1245,6 @@ function buildChips(sections, dates) {
     });
   });
 
-  // Available toggle
   document.getElementById('avail-btn').addEventListener('click', () => {
     availOnly = !availOnly;
     document.getElementById('avail-btn').classList.toggle('avail-on', availOnly);
@@ -619,6 +1278,7 @@ async function init() {
     films = await res.json();
     films.sort((a, b) => (b.prizes?.length || 0) - (a.prizes?.length || 0));
     updateStats();
+    updatePlanBadge();
     const sections = [...new Set(films.flatMap(f => f.sections))];
     const dates = [...new Set(films.flatMap(f => f.screenings.map(s => extractDate(s.datetime_text)).filter(Boolean)))].sort(dateSort);
     buildChips(sections, dates);
