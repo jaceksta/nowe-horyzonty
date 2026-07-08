@@ -603,6 +603,37 @@
       min-height: 160px;
     }
 
+    /* ── plan tooltip ── */
+    .plan-tooltip {
+      position: fixed;
+      z-index: 1000;
+      max-width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--seam);
+      border-radius: 4px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
+      padding: 12px 14px;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .1s ease;
+    }
+    .plan-tooltip.visible { opacity: 1; visibility: visible; }
+
+    .pt-title {
+      font-family: 'Roboto', sans-serif;
+      font-size: 13.5px; font-weight: 500;
+      line-height: 1.3; margin-bottom: 3px;
+    }
+    .pt-meta {
+      font-size: 10.5px; color: var(--text-3);
+      margin-bottom: 8px;
+    }
+    .pt-desc {
+      font-size: 12px; line-height: 1.6; color: var(--text-2);
+      max-height: 220px; overflow-y: auto;
+    }
+
     /* ── legend ── */
     .tl-legend {
       display: flex; gap: 16px; flex-wrap: wrap;
@@ -760,6 +791,7 @@ function setTab(name) {
   document.getElementById('plan-view').hidden      = inProgram;
   document.getElementById('tab-program').classList.toggle('vtab-on', inProgram);
   document.getElementById('tab-plan').classList.toggle('vtab-on', !inProgram);
+  hidePlanTooltip();
   if (!inProgram) renderPlanView();
 }
 
@@ -802,7 +834,68 @@ document.getElementById('plan-view').addEventListener('click', e => {
   e.stopPropagation();
   excludedScreenings.add(btn.dataset.sid);
   localStorage.setItem('nh-excluded', JSON.stringify([...excludedScreenings]));
+  hidePlanTooltip();
   renderPlanView();
+});
+
+// ── plan timeline tooltip (film description on hover) ───────────────────────────
+let planTooltipEl = null;
+function ensurePlanTooltip() {
+  if (!planTooltipEl) {
+    planTooltipEl = document.createElement('div');
+    planTooltipEl.className = 'plan-tooltip';
+    document.body.appendChild(planTooltipEl);
+  }
+  return planTooltipEl;
+}
+
+function positionPlanTooltip(x, y) {
+  const el = planTooltipEl;
+  if (!el) return;
+  const pad = 16;
+  const rect = el.getBoundingClientRect();
+  let left = x + pad;
+  let top  = y + pad;
+  if (left + rect.width > window.innerWidth - 8)  left = x - rect.width - pad;
+  if (top + rect.height > window.innerHeight - 8) top  = y - rect.height - pad;
+  el.style.left = `${Math.max(8, left)}px`;
+  el.style.top  = `${Math.max(8, top)}px`;
+}
+
+function showPlanTooltip(film, x, y) {
+  const el = ensurePlanTooltip();
+  const desc = (film.description || '').replace(/\n+/g, ' ').trim();
+  el.innerHTML = `
+    <div class="pt-title">${film.title}</div>
+    ${film.director ? `<div class="pt-meta">${film.director}${film.duration_minutes ? ` · ${film.duration_minutes}'` : ''}</div>` : ''}
+    ${desc ? `<div class="pt-desc">${desc}</div>` : ''}
+  `;
+  el.classList.add('visible');
+  positionPlanTooltip(x, y);
+}
+
+function hidePlanTooltip() {
+  if (planTooltipEl) planTooltipEl.classList.remove('visible');
+}
+
+document.getElementById('plan-view').addEventListener('mouseover', e => {
+  const block = e.target.closest('.film-block');
+  if (!block || block.contains(e.relatedTarget)) return;
+  const film = films.find(f => f.slug === block.dataset.slug);
+  if (!film) return;
+  showPlanTooltip(film, e.clientX, e.clientY);
+});
+
+document.getElementById('plan-view').addEventListener('mousemove', e => {
+  if (!planTooltipEl || !planTooltipEl.classList.contains('visible')) return;
+  if (!e.target.closest('.film-block')) return;
+  positionPlanTooltip(e.clientX, e.clientY);
+});
+
+document.getElementById('plan-view').addEventListener('mouseout', e => {
+  const block = e.target.closest('.film-block');
+  if (!block || block.contains(e.relatedTarget)) return;
+  hidePlanTooltip();
 });
 
 // ── scheduling algorithm ───────────────────────────────────────────────────────
@@ -935,8 +1028,8 @@ function buildTimeline(allBlocks, conflictIds) {
       const laneW  = 100 / numLanes;
 
       return `<div class="film-block${conflict ? ' conflict' : ''}"
-               style="top:${top}px;height:${height}px;left:calc(${lane*laneW}% + 3px);right:calc(${100-(lane+1)*laneW}% + 3px)"
-               title="${film.title.replace(/"/g,'&quot;')}\n${time}–~${endStr}\n${screening.venue}">
+               data-slug="${film.slug}"
+               style="top:${top}px;height:${height}px;left:calc(${lane*laneW}% + 3px);right:calc(${100-(lane+1)*laneW}% + 3px)">
         <button class="fb-remove" data-sid="${screening.screening_id}" title="Usuń seans">×</button>
         <div class="fb-time">${time} – ~${endStr}</div>
         <div class="fb-title">${film.title}</div>
@@ -959,7 +1052,7 @@ function buildTimeline(allBlocks, conflictIds) {
   return `<div class="tl-legend">
     <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>seans w planie</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>konflikt czasowy</div>
-    <div class="legend-item" style="color:var(--text-3);font-style:italic">najedź na blok → × usuwa seans</div>
+    <div class="legend-item" style="color:var(--text-3);font-style:italic">najedź na blok → opis filmu, × usuwa seans</div>
   </div>
   <div class="tl-wrap">
     <div class="tl-flex">
