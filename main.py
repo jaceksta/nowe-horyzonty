@@ -29,6 +29,7 @@ class Film:
     director: str = ""
     title_original: str = ""
     description: str = ""
+    duration_minutes: int = 0
     prizes: list[str] = field(default_factory=list)
     sections: list[str] = field(default_factory=list)
     screenings: list[Screening] = field(default_factory=list)
@@ -110,15 +111,21 @@ def scrape_section(client: httpx.Client, section_url: str, fallback_name: str) -
     return section_name, films
 
 
-def scrape_film_detail(client: httpx.Client, film_url: str) -> tuple[str, list[str]]:
-    """Fetch a /program/26/slug page and return (description, prizes)."""
+def scrape_film_detail(client: httpx.Client, film_url: str) -> tuple[str, int, list[str]]:
+    """Fetch a /program/26/slug page and return (description, duration_minutes, prizes)."""
     soup = fetch(client, film_url)
     desc_el = soup.select_one("div.tresc.glownyop")
     desc = desc_el.get_text(separator="\n", strip=True) if desc_el else ""
 
     prizes = [li.get_text(strip=True) for li in soup.select(".nagrody li") if li.get_text(strip=True)]
 
-    return desc, prizes
+    # Duration appears as e.g. "Hiszpania, Francja 2026 / 155'"
+    duration_minutes = 0
+    m = re.search(r"/ (\d+)['’]", soup.get_text())
+    if m:
+        duration_minutes = int(m.group(1))
+
+    return desc, duration_minutes, prizes
 
 
 # ---------------------------------------------------------------------------
@@ -268,8 +275,8 @@ def scrape_all() -> list[Film]:
             print(f"\nFetching descriptions for {len(films)} section film(s)...")
             for film in films.values():
                 try:
-                    film.description, film.prizes = scrape_film_detail(client, film.url)
-                    print(f"  {film.title}: {len(film.description)} chars, {len(film.prizes)} prize(s)")
+                    film.description, film.duration_minutes, film.prizes = scrape_film_detail(client, film.url)
+                    print(f"  {film.title}: {len(film.description)} chars, {film.duration_minutes}', {len(film.prizes)} prize(s)")
                 except Exception as e:
                     print(f"  {film.title}: error — {e}")
                 time.sleep(0.3)

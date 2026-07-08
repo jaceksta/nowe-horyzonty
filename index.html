@@ -292,6 +292,10 @@
       font-size: 9.5px; letter-spacing: .12em;
       text-transform: uppercase;
     }
+    .dur {
+      font-size: 10.5px; color: var(--text-3);
+      margin-left: 6px; opacity: .7;
+    }
 
     /* screening tags */
     .stag {
@@ -740,8 +744,8 @@ const PLAN_DAYS = [
   { key: 'cz 30 lip', short: 'CZ', date: '30 lip' },
 ];
 
-const DURATION_MIN = 120;
-const BUFFER_MIN   = 15;
+const FALLBACK_DURATION = 90;
+const BUFFER_MIN        = 15;
 const PX_PER_MIN   = 1;
 const TL_START_H   = 9;
 const TL_END_H     = 24;
@@ -807,19 +811,25 @@ function minsFromMidnight(dtText) {
   return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : null;
 }
 
-function screeningsConflict(s1, s2) {
-  if (extractDate(s1.datetime_text) !== extractDate(s2.datetime_text)) return false;
-  const m1 = minsFromMidnight(s1.datetime_text);
-  const m2 = minsFromMidnight(s2.datetime_text);
+function filmDuration(film) {
+  return film.duration_minutes || FALLBACK_DURATION;
+}
+
+function blocksConflict(b1, b2) {
+  if (extractDate(b1.screening.datetime_text) !== extractDate(b2.screening.datetime_text)) return false;
+  const m1 = minsFromMidnight(b1.screening.datetime_text);
+  const m2 = minsFromMidnight(b2.screening.datetime_text);
   if (m1 === null || m2 === null) return false;
-  return Math.abs(m1 - m2) < DURATION_MIN + BUFFER_MIN;
+  const d1 = filmDuration(b1.film);
+  const d2 = filmDuration(b2.film);
+  return m1 < m2 + d2 + BUFFER_MIN && m2 < m1 + d1 + BUFFER_MIN;
 }
 
 function findConflicts(blocks) {
   const ids = new Set();
   for (let i = 0; i < blocks.length; i++)
     for (let j = i + 1; j < blocks.length; j++)
-      if (screeningsConflict(blocks[i].screening, blocks[j].screening)) {
+      if (blocksConflict(blocks[i], blocks[j])) {
         ids.add(blocks[i].screening.screening_id);
         ids.add(blocks[j].screening.screening_id);
       }
@@ -846,7 +856,7 @@ function optimize(selectedFilms) {
     if (!options.length) { noOptions.push(film); continue; }
 
     const scored = options.map(opt => {
-      const conflictWith = scheduled.filter(s => screeningsConflict(opt, s.screening)).map(s => s.film);
+      const conflictWith = scheduled.filter(s => blocksConflict({ film, screening: opt }, s)).map(s => s.film);
       return { opt, conflictWith };
     }).sort((a, b) => a.conflictWith.length - b.conflictWith.length);
 
@@ -866,18 +876,19 @@ function assignLanes(blocks) {
   const laneEnds = [];
   blocks.forEach(block => {
     const start = minsFromMidnight(block.screening.datetime_text) ?? 0;
+    const dur   = filmDuration(block.film);
     let placed = false;
     for (let i = 0; i < laneEnds.length; i++) {
       if (start >= laneEnds[i]) {
         block.lane = i;
-        laneEnds[i] = start + DURATION_MIN;
+        laneEnds[i] = start + dur;
         placed = true;
         break;
       }
     }
     if (!placed) {
       block.lane = laneEnds.length;
-      laneEnds.push(start + DURATION_MIN);
+      laneEnds.push(start + dur);
     }
   });
   return Math.max(laneEnds.length, 1);
@@ -915,10 +926,11 @@ function buildTimeline(allBlocks, conflictIds) {
     const blocksHtml = blocks.map(({ film, screening, conflict, lane }) => {
       const startMin = minsFromMidnight(screening.datetime_text);
       if (startMin === null) return '';
+      const dur    = filmDuration(film);
       const top    = (startMin - TL_START_H * 60) * PX_PER_MIN;
-      const height = Math.max(DURATION_MIN * PX_PER_MIN, 44);
+      const height = Math.max(dur * PX_PER_MIN, 44);
       const time   = screening.datetime_text.match(/, (.+)/)?.[1] ?? '';
-      const endMin = startMin + DURATION_MIN;
+      const endMin = startMin + dur;
       const endStr = `${Math.floor(endMin / 60)}:${String(endMin % 60).padStart(2, '0')}`;
       const laneW  = 100 / numLanes;
 
@@ -985,7 +997,8 @@ function buildPlanListText(blocks) {
     lines.push(DAY_LABELS[d.key]);
     day.forEach(b => {
       const time = b.screening.datetime_text.match(/, (.+)/)?.[1] ?? '';
-      lines.push(`  • ${b.film.title} — ${time}, ${b.screening.venue}`);
+      const dur  = b.film.duration_minutes ? ` (${b.film.duration_minutes}')` : '';
+      lines.push(`  • ${b.film.title} — ${time}, ${b.screening.venue}${dur}`);
     });
     lines.push('');
   });
@@ -1130,7 +1143,7 @@ function card(film, idx, animate) {
     ${badgesHtml ? `<div class="badges">${badgesHtml}</div>` : ''}
     <h2 class="title"><a href="${film.url}" target="_blank" rel="noopener">${film.title}</a></h2>
     ${hasDiff ? `<p class="orig">${film.title_original}</p>` : ''}
-    ${film.director ? `<p class="dir">${film.director}</p>` : ''}
+    ${film.director ? `<p class="dir">${film.director}${film.duration_minutes ? `<span class="dur">· ${film.duration_minutes}'</span>` : ''}</p>` : ''}
     ${desc ? `
     <div class="desc">
       <div class="desc-body">${desc}</div>
